@@ -398,16 +398,3 @@ export function pixelIcon(name, scale = 3) {
         `shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`
     );
 }
-
-// Fileira de corações no estilo da barra de vida do jogo (2 pontos de vida por coração).
-export function heartsRow(health, { total = 10, scale = 2 } = {}) {
-    const halves = Math.round(health / (100 / (total * 2)));
-    let html = "";
-
-    for (let i = 0; i < total; i++) {
-        const name = halves >= i * 2 + 2 ? "heart" : halves === i * 2 + 1 ? "heartHalf" : "heartEmpty";
-        html += pixelIcon(name, scale);
-    }
-
-    return html;
-}

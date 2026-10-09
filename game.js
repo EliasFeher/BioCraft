@@ -1,16 +1,17 @@
 import { $, clamp, reduceMotion } from "./utils.js";
-import { pixelIcon, heartsRow } from "./pixel-art.js";
+import { pixelIcon } from "./pixel-art.js";
 import { createTotem } from "./totem.js";
 import {
     CARDS,
+    BREAK_AT,
     newGame,
     currentCard,
     choose,
-    dotSize,
-    tally,
+    imbalance,
+    totemHealth,
+    totemMessage,
     ENDINGS,
     endingOf,
-    planetMessage,
 } from "./game-rules.js";
 
 
@@ -27,8 +28,6 @@ const el = {
     sustainabilityBar: $("sustainabilityBar"),
 
     // planeta
-    hearts: $("hearts"),
-    healthNumber: $("healthNumber"),
     step: $("gameStep"),
     pips: $("stepPips"),
     message: $("gameMessage"),
@@ -59,7 +58,7 @@ const el = {
 const totem = createTotem($("totemStage"));
 
 let game = newGame();
-let pendingResult = null; // { option, change } depois de escolher, até clicar em "Continuar"
+let pendingResult = null; // { option, change, health } depois de escolher, até clicar em "Continuar"
 let shown = {}; // últimos valores mostrados, para destacar o que mudou
 let lastFocus = null;
 
@@ -68,12 +67,11 @@ let lastFocus = null;
 
 const signed = (n) => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n);
 
-const tone = (n, goodWhenUp = true) => (n === 0 ? "" : n > 0 === goodWhenUp ? "good" : "bad");
+const tone = (n) => (n > 0 ? "good" : n < 0 ? "bad" : "neutral");
 
-const chipsHtml = (chips) =>
-    chips.map((c) => `<span class="chip ${c.good ? "good" : "bad"}">${c.text}</span>`).join("");
+const chipsHtml = (chips) => chips.map((c) => `<span class="chip ${c.tone}">${c.text}</span>`).join("");
 
-// Faz o número "piscar" em verde (melhorou) ou vermelho (piorou).
+// Faz o número "piscar" em verde (subiu) ou vermelho (desceu).
 function flash(node, good) {
     node.classList.remove("flash-good", "flash-bad");
     void node.offsetWidth; // reinicia a animação
@@ -90,19 +88,12 @@ function setNumber(node, key, value) {
 
 const barTone = (value, goodFrom, warnFrom) => (value >= goodFrom ? "good" : value >= warnFrom ? "warn" : "bad");
 
-// Linha de bolinhas que mostra o tamanho do impacto de uma escolha num medidor (sem dar o número exato).
-function impactHtml(amount, icon) {
-    const size = dotSize(amount);
-    if (size === 0) return "";
-
-    const dots = Array.from({ length: 3 }, (_, i) => `<i class="${i < size ? "on" : ""}"></i>`).join("");
-    return `<span class="impact-stat ${amount > 0 ? "up" : "down"}">${pixelIcon(icon, 2)}${dots}</span>`;
-}
-
-function changeChips(change) {
+// Depois da escolha: quanto cada medidor mudou (sem julgar) e se o equilíbrio melhorou ou piorou.
+function resultChips({ change, health: [before, after] }) {
     const chips = [];
-    if (change.economy) chips.push({ text: `${signed(change.economy)} economia`, good: change.economy > 0 });
-    if (change.sustainability) chips.push({ text: `${signed(change.sustainability)} sustentabilidade`, good: change.sustainability > 0 });
+    if (change.economy) chips.push({ text: `${signed(change.economy)} economia`, tone: "neutral" });
+    if (change.sustainability) chips.push({ text: `${signed(change.sustainability)} sustentabilidade`, tone: "neutral" });
+    chips.push({ text: `Equilíbrio ${before} → ${after}`, tone: tone(after - before) });
     return chips;
 }
 
@@ -120,53 +111,40 @@ function renderCompany() {
     setNumber(el.economy, "economy", game.economy);
     setNumber(el.sustainability, "sustainability", game.sustainability);
 
+    // só o medidor que ficou para trás muda de cor, conforme o equilíbrio piora
+    const lagging = barTone(totemHealth(game), 70, 40);
+    const d = imbalance(game);
+
     el.economyBar.style.width = `${game.economy}%`;
-    el.economyBar.dataset.tone = barTone(game.economy, 50, 25);
+    el.economyBar.dataset.tone = d > 0 ? lagging : "good";
     el.sustainabilityBar.style.width = `${game.sustainability}%`;
-    el.sustainabilityBar.dataset.tone = barTone(game.sustainability, 50, 25);
+    el.sustainabilityBar.dataset.tone = d < 0 ? lagging : "good";
 }
 
 function renderPlanet() {
-    const health = game.sustainability;
-
-    el.hearts.innerHTML = heartsRow(health, { scale: 3 });
-    el.hearts.setAttribute("aria-label", `Saúde do planeta: ${health} de 100`);
-    el.healthNumber.textContent = health;
-
-    if (shown.health !== undefined && health < shown.health) {
-        el.hearts.classList.remove("hurt");
-        void el.hearts.offsetWidth;
-        el.hearts.classList.add("hurt");
-    }
-    shown.health = health;
+    const health = totemHealth(game);
 
     el.step.textContent = Math.min(game.step + 1, CARDS.length);
     [...el.pips.children].forEach((pip, i) => {
         pip.className = i < game.step ? "done" : i === game.step && !game.over ? "now" : "";
     });
 
-    el.message.textContent = planetMessage(health, game.over);
-    // a fumaça no fundo aparece quando a saúde cai abaixo de 75
-    el.world.style.setProperty("--smog", clamp((75 - health) / 75, 0, 1).toFixed(2));
+    el.message.textContent = totemMessage(game);
+    // a fumaça no fundo aparece quando o planeta fica para trás da economia
+    el.world.style.setProperty("--smog", clamp(-imbalance(game) / BREAK_AT, 0, 1).toFixed(2));
 
-    if (game.over === "colapso") totem.shatter();
+    if (game.over === "falencia" || game.over === "colapso") totem.shatter();
     else totem.setHealth(health);
 }
 
 function renderChoices(card) {
-    el.choices.innerHTML = "";
+    el.choices.replaceChildren();
 
     card.options.forEach((option, side) => {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "card-choice";
-        button.innerHTML = `
-            <strong>${option.label}</strong>
-            <span class="impact">
-                ${impactHtml(option.economy, "emerald")}
-                ${impactHtml(option.sustainability, "sapling")}
-            </span>`;
-
+        button.textContent = option.label;
         button.addEventListener("click", () => pickOption(side));
         el.choices.append(button);
     });
@@ -180,7 +158,7 @@ function renderCard() {
 
     if (pendingResult) {
         el.resultText.textContent = pendingResult.option.result;
-        el.resultChips.innerHTML = chipsHtml(changeChips(pendingResult.change));
+        el.resultChips.innerHTML = chipsHtml(resultChips(pendingResult));
     } else if (card) {
         el.portrait.innerHTML = pixelIcon(card.who.look, 6);
         el.name.textContent = card.who.name;
@@ -245,8 +223,8 @@ function showHowTo({ quiet = false } = {}) {
         body: `
             <ol class="howto">
                 <li><span>1</span><p>Você vai decidir <b>${CARDS.length} situações</b> no comando da BioCraft.</p></li>
-                <li><span>2</span><p>Cada carta tem duas escolhas: uma pesa mais para a <b>economia</b>, outra para a <b>sustentabilidade</b>.</p></li>
-                <li><span>3</span><p>Se um dos dois medidores chegar a zero, o jogo acaba. O <b>totem</b> mostra a saúde do planeta.</p></li>
+                <li><span>2</span><p>Cada carta tem duas escolhas. Uma puxa para a <b>economia</b> e a outra para a <b>sustentabilidade</b>.</p></li>
+                <li><span>3</span><p>Mantenha os dois em <b>equilíbrio</b>. Se um ficar muito para trás, o <b>totem</b> se desfaz.</p></li>
             </ol>`,
         buttons: [{ html: "Começar", onClick: closeModal }],
     });
@@ -265,11 +243,15 @@ function startGame() {
 }
 
 function pickOption(side) {
+    const before = totemHealth(game);
     const { option, change } = choose(game, side);
-    pendingResult = { option, change };
+    const after = totemHealth(game);
 
-    if (change.sustainability > 0) totem.burst("good");
-    else if (change.sustainability < 0) totem.burst("bad");
+    pendingResult = { option, change, health: [before, after] };
+
+    // faíscas quando a escolha aproxima os medidores, fumaça quando afasta
+    if (after > before) totem.burst("good");
+    else if (after < before) totem.burst("bad");
 
     render();
 }
@@ -281,28 +263,19 @@ function continueAfterResult() {
     if (game.over) showEnd();
 }
 
-// mood da notícia final: ícone e cor do selo, reaproveitando os corações do HUD
+// mood do final: ícone e cor do selo, reaproveitando os corações do HUD
 const END_BADGE = {
     won: ["heart", "g-S"],
     mixed: ["heartHalf", "g-B"],
     lost: ["heartEmpty", "lost"],
 };
 
-const endingFor = () => (game.over === "fim" ? ENDINGS[endingOf(game)] : ENDINGS[game.over]);
-
-const END_TAG = {
-    falencia: "FALÊNCIA",
-    colapso: "O TOTEM SE DESFEZ",
-    fim: `FIM DAS ${CARDS.length} DECISÕES`,
-};
-
 function showEnd() {
-    const ending = endingFor();
-    const counts = tally(game);
+    const ending = ENDINGS[endingOf(game)];
     const [icon, badgeClass] = END_BADGE[ending.mood];
 
     openModal({
-        tag: END_TAG[game.over],
+        tag: game.over === "fim" ? `FIM DAS ${CARDS.length} DECISÕES` : "O TOTEM SE DESFEZ",
         title: ending.title,
         tone: ending.mood === "lost" ? "lost" : "",
         body: `
@@ -314,7 +287,7 @@ function showEnd() {
             <dl class="end-stats">
                 <div><dt>Economia</dt><dd>${game.economy}</dd></div>
                 <div><dt>Sustentabilidade</dt><dd>${game.sustainability}</dd></div>
-                <div><dt>Pelo planeta</dt><dd>${counts.planeta}/${CARDS.length}</dd></div>
+                <div><dt>Equilíbrio</dt><dd>${totemHealth(game)}</dd></div>
             </dl>`,
         buttons: [
             {
