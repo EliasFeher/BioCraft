@@ -251,13 +251,19 @@ h2 {
 /* ---------- seções genéricas ---------- */
 
 .section {
-    padding: 120px 8vw;
+    padding: 90px 8vw 120px;
 }
 
 .section-header {
     max-width: 700px;
     margin: 0 auto 65px;
     text-align: center;
+    text-wrap: balance;
+}
+
+/* o cabeçalho fica no meio da faixa entre o menu e a linha divisória */
+.section > .section-header {
+    margin-bottom: 90px;
 }
 
 .section-tag {
