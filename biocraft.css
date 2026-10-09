@@ -224,29 +224,6 @@ h2 {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.hero-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 45px;
-    margin-top: 50px;
-}
-
-.stat {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.stat strong {
-    font-family: var(--mono);
-    font-size: 24px;
-}
-
-.stat span {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.65);
-}
-
 .hero-3d {
     position: relative;
     min-height: 600px;
@@ -1955,10 +1932,6 @@ footer {
 
     .hero-content {
         padding: 110px 25px 30px;
-    }
-
-    .hero-stats {
-        gap: 20px;
     }
 
     .hero-3d {
