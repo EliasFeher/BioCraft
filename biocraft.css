@@ -337,19 +337,20 @@ h2 {
     height: auto;
 }
 
+/* as bolhas sobem um pixel de cada vez, como num jogo */
 .bubble {
-    fill: rgba(255, 255, 255, 0.55);
-    animation: rise 4s ease-in infinite;
+    fill: rgba(255, 255, 255, 0.7);
+    animation: rise 4s steps(14) infinite;
 }
 
 @keyframes rise {
     from {
         transform: translateY(0);
-        opacity: 0.9;
+        opacity: 1;
     }
 
     to {
-        transform: translateY(-170px);
+        transform: translateY(-14px);
         opacity: 0;
     }
 }
@@ -357,16 +358,12 @@ h2 {
 .tank-label {
     fill: var(--green-light);
     font-family: var(--mono);
-    font-size: 16px;
+    font-size: 1.7px;
     font-weight: 700;
 }
 
-.tank-arrow {
-    fill: none;
-    stroke: var(--green-light);
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-dasharray: 5 6;
+.tank-pixel {
+    fill: var(--green-light);
 }
 
 
