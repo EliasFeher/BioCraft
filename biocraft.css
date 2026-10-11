@@ -288,7 +288,8 @@ h2 {
     max-width: 1230px;
     margin: 70px auto 0;
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
+    /* o desenho tem no máximo 380px; o resto fica para o texto */
+    grid-template-columns: minmax(0, 1fr) 380px;
     gap: 60px;
     align-items: center;
 }
@@ -297,7 +298,6 @@ h2 {
     margin: 12px 0 32px;
     font-size: clamp(38px, 5vw, 58px);
     line-height: 1.1;
-    text-wrap: balance;
     color: var(--green-dark);
 }
 
