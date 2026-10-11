@@ -251,7 +251,7 @@ h2 {
 /* ---------- seções genéricas ---------- */
 
 .section {
-    padding: 90px 8vw 120px;
+    padding: 120px 8vw;
 }
 
 .section-header {
@@ -259,11 +259,6 @@ h2 {
     margin: 0 auto 65px;
     text-align: center;
     text-wrap: balance;
-}
-
-/* o cabeçalho fica no meio da faixa entre o menu e a linha divisória */
-.section > .section-header {
-    margin-bottom: 90px;
 }
 
 .section-tag {
@@ -286,15 +281,6 @@ h2 {
 
 
 /* ---------- tecnologia ---------- */
-
-/* divisória: linha de ponta a ponta */
-
-.divider {
-    height: 2px;
-    /* anula o padding lateral da seção para ocupar a tela toda */
-    margin: 0 -8vw;
-    background: #a9c0af;
-}
 
 /* bloco sobre a árvore-líquida */
 
@@ -1945,10 +1931,6 @@ footer {
     .game-section,
     .contact-section {
         padding: 80px 25px;
-    }
-
-    .divider {
-        margin: 0 -25px;
     }
 
     .monitor-section {
