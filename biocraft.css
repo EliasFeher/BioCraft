@@ -79,13 +79,11 @@ h2 {
     color: var(--green-dark);
 }
 
-/* cubinho de grama feito só com gradientes */
+/* bloco de grama em pixel art */
 .logo-icon {
-    width: 30px;
-    height: 30px;
-    background:
-        linear-gradient(#5fbd51 0 32%, #438c3c 32% 40%, #80552e 40%);
-    border-radius: 4px;
+    flex: none;
+    width: 34px;
+    height: 34px;
 }
 
 .nav-links {
