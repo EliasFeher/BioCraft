@@ -2,7 +2,7 @@
 #
 # Instalar:  pip install -r requirements.txt   (precisa de Python 3.9 ou mais novo)
 # Chave:     copie .env.example para .env e coloque a sua GEMINI_API_KEY
-# Rodar:     python app.py   (fica em http://localhost:5000)
+# Rodar:     dentro da pasta chatbot, python app.py   (fica em http://localhost:5000)
 
 import os
 import threading
