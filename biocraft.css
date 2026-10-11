@@ -295,7 +295,7 @@ h2 {
 
 .liquid-text h2 {
     margin: 12px 0 32px;
-    font-size: clamp(30px, 4vw, 44px);
+    font-size: clamp(38px, 5vw, 58px);
     line-height: 1.1;
     text-wrap: balance;
     color: var(--green-dark);
