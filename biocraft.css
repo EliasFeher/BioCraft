@@ -293,8 +293,8 @@ h2 {
     align-items: center;
 }
 
-.liquid-text h3 {
-    margin: 12px 0 20px;
+.liquid-text h2 {
+    margin: 12px 0 32px;
     font-size: clamp(30px, 4vw, 44px);
     line-height: 1.1;
     text-wrap: balance;
