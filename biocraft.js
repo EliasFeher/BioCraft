@@ -2,7 +2,7 @@ import { $, clamp, reduceMotion } from "./utils.js";
 import { THREE, createStage, trackPointer, seededRandom } from "./scene-utils.js";
 import { createBlockMaterials } from "./blocks.js";
 import "./game.js";
-import "./chatbot/chat.js";
+import "./chat.js";
 
 
 /* ---------- menu mobile ---------- */

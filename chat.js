@@ -1,4 +1,4 @@
-import { $ } from "../utils.js";
+import { $ } from "./utils.js";
 
 // Endereço do servidor (app.py). Ao hospedar o servidor, troque aqui.
 const API_URL = "http://localhost:5000/chat";
