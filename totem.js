@@ -1,5 +1,4 @@
 import { THREE, createStage, addLights, trackPointer, seededRandom } from "./scene-utils.js";
-import { createBlockMaterials } from "./blocks.js";
 import { clamp, reduceMotion } from "./utils.js";
 import { totemDamage } from "./game-rules.js";
 
@@ -41,8 +40,7 @@ const PARTICLE_COLORS = {
 
 const VOXEL = 0.2;
 const DEPTH = [-1, 0, 1];
-const FLOOR_Y = -1.5; // altura do centro de um voxel apoiado na plataforma
-const GROUND = 1.6; // até onde as peças caídas podem ir sem sair da plataforma
+const OUT_Y = -6; // abaixo daqui a peça que caiu já saiu da tela e para de se mexer
 const MAX_PARTICLES = 140;
 
 // Cor da luz atrás do totem: verde quando está saudável, vermelha quando está mal.
@@ -75,32 +73,10 @@ export function createTotem(container) {
     stage.scene.add(aura);
 
     const random = seededRandom(7);
-    const world = new THREE.Group(); // gira junto: plataforma, totem e peças
+    const world = new THREE.Group(); // gira junto: totem e peças
     const totem = new THREE.Group();
     world.add(totem);
     stage.scene.add(world);
-
-
-    /* ----- plataforma de blocos ----- */
-
-    const blocks = createBlockMaterials();
-    const BLOCK = 0.5;
-    const blockGeometry = new THREE.BoxGeometry(BLOCK, BLOCK, BLOCK);
-
-    // cada camada é menor que a de cima
-    [
-        { y: -1.85, half: 3, type: "grass" },
-        { y: -2.35, half: 2, type: "dirt" },
-        { y: -2.85, half: 1, type: "stone" },
-    ].forEach(({ y, half, type }) => {
-        for (let x = -half; x <= half; x++) {
-            for (let z = -half; z <= half; z++) {
-                const block = new THREE.Mesh(blockGeometry, blocks[type]);
-                block.position.set(x * BLOCK, y, z * BLOCK);
-                world.add(block);
-            }
-        }
-    });
 
 
     /* ----- voxels do totem ----- */
@@ -122,7 +98,7 @@ export function createTotem(container) {
                     rot: new THREE.Vector3(),
                     spin: new THREE.Vector3(),
                     broken: false, // queimado (cinza)
-                    fallen: false, // solto, caído na plataforma
+                    fallen: false, // solto, caindo para fora da tela
                     rest: false,
                 });
             });
@@ -185,10 +161,6 @@ export function createTotem(container) {
 
         v.spin.set((random() - 0.5) * 9, (random() - 0.5) * 9, (random() - 0.5) * 9);
     }
-
-    // Se a peça cair fora da plataforma, traz de volta para perto da borda.
-    const onPlatform = (value) =>
-        Math.abs(value) > GROUND ? Math.sign(value) * (GROUND - random() * 0.5) : value;
 
 
     /* ----- partículas ----- */
@@ -266,7 +238,7 @@ export function createTotem(container) {
         spinX += ((pointer.over ? (pointer.y - 0.5) * 0.5 : 0) - spinX) * 0.06;
 
         world.rotation.set(0.12 + spinX, spinY, 0);
-        world.position.y = 0.75 + (reduceMotion ? 0 : Math.sin(time * 0.0012) * 0.05);
+        world.position.y = reduceMotion ? 0 : Math.sin(time * 0.0012) * 0.05;
 
         // com a saúde baixa o totem treme
         const shake = shattered ? 0 : clamp((35 - health) / 35, 0, 1) * 0.04;
@@ -291,27 +263,8 @@ export function createTotem(container) {
                     v.pos.addScaledVector(v.vel, dt);
                     v.rot.addScaledVector(v.spin, dt);
 
-                    if (v.pos.y <= FLOOR_Y) {
-                        v.pos.y = FLOOR_Y;
-                        v.pos.x = onPlatform(v.pos.x);
-                        v.pos.z = onPlatform(v.pos.z);
-                        v.vel.y *= -0.3;
-                        v.vel.x *= 0.7;
-                        v.vel.z *= 0.7;
-                        v.spin.multiplyScalar(0.6);
-
-                        if (Math.abs(v.vel.y) < 0.5) {
-                            // para de se mexer e se alinha como um bloco apoiado
-                            v.rest = true;
-                            v.vel.set(0, 0, 0);
-                            v.spin.set(0, 0, 0);
-                            v.rot.set(
-                                Math.round(v.rot.x / (Math.PI / 2)) * (Math.PI / 2),
-                                Math.round(v.rot.y / (Math.PI / 2)) * (Math.PI / 2),
-                                Math.round(v.rot.z / (Math.PI / 2)) * (Math.PI / 2)
-                            );
-                        }
-                    }
+                    // sem chão: a peça cai até sumir embaixo da tela e para por lá
+                    if (v.pos.y < OUT_Y) v.rest = true;
                 }
             } else {
                 v.pos.lerp(v.home, ease);

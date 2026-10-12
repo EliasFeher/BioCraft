@@ -3,7 +3,7 @@
 // Secrets (Supabase > Edge Functions > Secrets):
 //   GEMINI_API_KEY   obrigatório, a chave do Google AI Studio
 //   ALLOWED_ORIGINS  opcional, sites que podem usar o chat separados por vírgula
-//                    (ex: https://biocraft.vercel.app,https://www.seudominio.com.br)
+//                    (ex: https://biocraft-industries.vercel.app,https://www.seudominio.com.br)
 // SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY o próprio Supabase já fornece.
 //
 // O site manda a pergunta e as últimas mensagens da conversa; a função não guarda nada,
@@ -11,9 +11,9 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const MODEL = "gemini-3.8-flash";
+// Tenta na ordem: se um modelo estiver sobrecarregado ou fora do ar, passa para o próximo.
+const MODELS = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
 const RATE_LIMIT = 20; // mensagens por minuto de cada pessoa
-const RETRIES = 3; // tentativas quando o Google responde "alta demanda" (503)
 const MAX_MESSAGE_CHARS = 500; // tamanho máximo de cada pergunta
 const MAX_HISTORY = 20; // mensagens anteriores que a conversa lembra
 const MAX_HISTORY_CHARS = 1500; // tamanho máximo de cada mensagem anterior
@@ -98,23 +98,29 @@ async function askGemini(history: Turn[], question: string): Promise<string> {
         })),
     });
 
-    for (let attempt = 1; ; attempt++) {
+    const failures: string[] = [];
+
+    for (const model of MODELS) {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
             { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey }, body },
         );
 
-        if (response.status === 503 && attempt < RETRIES) {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            continue;
+        if (!response.ok) {
+            failures.push(`${model} ${response.status}`);
+            // sobrecarga, limite de uso ou modelo indisponível: tenta o próximo da lista
+            if ([404, 429, 500, 503].includes(response.status)) continue;
+            throw new Error(`Gemini ${failures.join(", ")}: ${(await response.text()).slice(0, 300)}`);
         }
-        if (!response.ok) throw new Error(`Gemini ${response.status}: ${(await response.text()).slice(0, 300)}`);
 
         const data = await response.json();
         const parts = data?.candidates?.[0]?.content?.parts ?? [];
         const text = parts.map((p: { text?: string }) => p.text ?? "").join("").trim();
+        if (failures.length) console.log("Modelo de reserva usado:", model, "| falharam:", failures.join(", "));
         return text || "Não sei te responder isso.";
     }
+
+    throw new Error(`Gemini: todos os modelos falharam (${failures.join(", ")})`);
 }
 
 Deno.serve(async (req) => {
