@@ -1,12 +1,12 @@
 import { $ } from "./utils.js";
 
-// Endereço do servidor (app.py). No seu computador usa o local; no site publicado usa o hospedado.
-// Depois de hospedar, troque SEU-SERVIDOR pelo endereço que a hospedagem der.
-const LOCAL = ["localhost", "127.0.0.1", ""].includes(location.hostname);
-const API_URL = LOCAL ? "http://localhost:5000/chat" : "https://SEU-SERVIDOR.onrender.com/chat";
+// Função do chat no Supabase (o código fica em supabase/functions/chat/index.ts).
+const API_URL = "https://yrbgmhmvotipylxljhip.supabase.co/functions/v1/chat";
+const MAX_HISTORY = 20; // mensagens anteriores enviadas junto, para o assistente lembrar da conversa
 
 const GREETING = "Olá! Eu sou o assistente da BioCraft. Posso explicar como funciona a árvore-líquida, o projeto e o jogo.";
 const OFFLINE = "O assistente está fora do ar agora. Tente de novo em alguns minutos ou escreva para contato@biocraft.com.";
+const TOO_FAST = "Você mandou muitas mensagens seguidas. Espere um minutinho e tente de novo.";
 
 const el = {
     toggle: $("chatToggle"),
@@ -17,21 +17,7 @@ const el = {
     send: $("chatForm").querySelector("button"),
 };
 
-// um código por visitante, para o servidor manter cada conversa separada
-function sessionId() {
-    try {
-        let id = sessionStorage.getItem("biocraft-chat");
-        if (!id) {
-            id = crypto.randomUUID();
-            sessionStorage.setItem("biocraft-chat", id);
-        }
-        return id;
-    } catch {
-        return "anonimo";
-    }
-}
-
-const session = sessionId();
+const history = []; // { role: "user" | "model", text }
 let waiting = false;
 
 function addMessage(text, who) {
@@ -61,11 +47,12 @@ async function ask(question) {
     const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensagem: question, sessao: session }),
+        body: JSON.stringify({ mensagem: question, historico: history.slice(-MAX_HISTORY) }),
     });
 
+    if (response.status === 429) return { text: TOO_FAST, ok: false };
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return (await response.json()).resposta;
+    return { text: (await response.json()).resposta, ok: true };
 }
 
 el.form.addEventListener("submit", async (event) => {
@@ -82,7 +69,10 @@ el.form.addEventListener("submit", async (event) => {
     const typing = addMessage("Digitando...", "bot typing");
 
     try {
-        typing.textContent = await ask(question);
+        const answer = await ask(question);
+        typing.textContent = answer.text;
+        // só entra no histórico o que o assistente respondeu de verdade
+        if (answer.ok) history.push({ role: "user", text: question }, { role: "model", text: answer.text });
     } catch {
         typing.textContent = OFFLINE;
     }

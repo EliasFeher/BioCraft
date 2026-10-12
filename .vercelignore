@@ -1,0 +1,9 @@
+# A Vercel só publica o site. O chat roda no Supabase.
+app.py
+chatbot.py
+requirements.txt
+render.yaml
+supabase/
+_original/
+.env
+.env.example
