@@ -1,7 +1,9 @@
 import { $ } from "./utils.js";
 
-// Endereço do servidor (app.py). Ao hospedar o servidor, troque aqui.
-const API_URL = "http://localhost:5000/chat";
+// Endereço do servidor (app.py). No seu computador usa o local; no site publicado usa o hospedado.
+// Depois de hospedar, troque SEU-SERVIDOR pelo endereço que a hospedagem der.
+const LOCAL = ["localhost", "127.0.0.1", ""].includes(location.hostname);
+const API_URL = LOCAL ? "http://localhost:5000/chat" : "https://SEU-SERVIDOR.onrender.com/chat";
 
 const GREETING = "Olá! Eu sou o assistente da BioCraft. Posso explicar como funciona a árvore-líquida, o projeto e o jogo.";
 const OFFLINE = "O assistente está fora do ar agora. Tente de novo em alguns minutos ou escreva para contato@biocraft.com.";
@@ -9,7 +11,6 @@ const OFFLINE = "O assistente está fora do ar agora. Tente de novo em alguns mi
 const el = {
     toggle: $("chatToggle"),
     panel: $("chatPanel"),
-    close: $("chatClose"),
     messages: $("chatMessages"),
     form: $("chatForm"),
     input: $("chatInput"),
@@ -46,6 +47,7 @@ function setOpen(open) {
     el.panel.hidden = !open;
     el.toggle.setAttribute("aria-expanded", open);
     el.toggle.classList.toggle("open", open);
+    el.toggle.setAttribute("aria-label", open ? "Fechar o chat" : "Abrir o chat");
 
     if (open) {
         if (!el.messages.children.length) addMessage(GREETING, "bot");
@@ -93,7 +95,6 @@ el.form.addEventListener("submit", async (event) => {
 });
 
 el.toggle.addEventListener("click", () => setOpen(el.panel.hidden));
-el.close.addEventListener("click", () => setOpen(false));
 
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !el.panel.hidden) setOpen(false);

@@ -1811,48 +1811,52 @@ h2 {
 }
 
 .chat-toggle {
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
     border: none;
-    background: var(--brand);
-    color: #fff;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 700;
-    box-shadow: 0 4px 0 #032a18;
+    background: none;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: transform 0.15s;
 }
 
 .chat-toggle:hover {
-    background: var(--brand-2);
+    transform: translateY(-3px);
 }
 
 .chat-toggle:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 #032a18;
+    transform: translateY(0);
 }
 
 .chat-toggle:focus-visible,
-.chat-close:focus-visible,
 .chat-form button:focus-visible {
     outline: 3px solid var(--green-light);
     outline-offset: 2px;
 }
 
-/* balãozinho de fala desenhado em pixels */
-.chat-toggle-icon {
-    width: 14px;
-    height: 12px;
-    background: var(--green-light);
-    clip-path: polygon(0 0, 100% 0, 100% 75%, 45% 75%, 20% 100%, 20% 75%, 0 75%);
+.chat-icon {
+    width: 36px;
+    height: auto;
+}
+
+.chat-icon-close {
+    width: 26px;
+    display: none;
+}
+
+.chat-toggle.open .chat-icon-open {
+    display: none;
+}
+
+.chat-toggle.open .chat-icon-close {
+    display: block;
 }
 
 .chat-panel {
     width: min(380px, calc(100vw - 32px));
-    height: min(520px, calc(100vh - 150px));
+    /* deixa uma folga em cima para o painel nunca encostar no menu */
+    height: min(520px, calc(100vh - 200px));
     display: flex;
     flex-direction: column;
     background: var(--surface);
@@ -1887,21 +1891,6 @@ h2 {
     width: 9px;
     height: 9px;
     background: var(--green-light);
-}
-
-.chat-close {
-    width: 30px;
-    height: 30px;
-    border: none;
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.chat-close:hover {
-    background: rgba(255, 255, 255, 0.22);
 }
 
 .chat-messages {
