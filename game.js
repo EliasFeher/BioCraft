@@ -1,6 +1,7 @@
 import { $, clamp, reduceMotion } from "./utils.js";
 import { pixelIcon } from "./pixel-art.js";
 import { createTotem } from "./totem.js";
+import { createWorld } from "./world.js";
 import {
     CARDS,
     BREAK_AT,
@@ -12,6 +13,9 @@ import {
     totemMessage,
     ENDINGS,
     endingOf,
+    worldOf,
+    worldNotes,
+    worldMessage,
 } from "./game-rules.js";
 
 
@@ -28,11 +32,14 @@ const el = {
     sustainabilityBar: $("sustainabilityBar"),
 
     // planeta
+    totemStage: $("totemStage"),
+    worldStage: $("worldStage"),
     step: $("gameStep"),
     pips: $("stepPips"),
     message: $("gameMessage"),
 
     // carta da situação
+    cardLabel: $("cardLabel"),
     question: $("cardQuestion"),
     portrait: $("cardPortrait"),
     name: $("cardName"),
@@ -44,6 +51,11 @@ const el = {
     resultText: $("resultText"),
     resultChips: $("resultChips"),
     continueBtn: $("continueBtn"),
+    end: $("cardEnd"),
+    endTitle: $("endTitle"),
+    endNotes: $("endNotes"),
+    again: $("againBtn"),
+    resultBtn: $("resultBtn"),
     howTo: $("howTo"),
 
     // janela de avisos
@@ -56,6 +68,8 @@ const el = {
 };
 
 const totem = createTotem($("totemStage"));
+let planet = null; // o planeta em 3D, criado só na primeira vez que a pessoa pede para vê-lo
+let viewing = false; // true enquanto o planeta está na tela no lugar do totem
 
 let game = newGame();
 let pendingResult = null; // { option, change, health } depois de escolher, até clicar em "Continuar"
@@ -129,6 +143,11 @@ function renderPlanet() {
         pip.className = i < game.step ? "done" : i === game.step && !game.over ? "now" : "";
     });
 
+    if (viewing) {
+        el.message.textContent = worldMessage(game);
+        return;
+    }
+
     el.message.textContent = totemMessage(game);
     // a fumaça no fundo aparece quando o planeta fica para trás da economia
     el.world.style.setProperty("--smog", clamp(-imbalance(game) / BREAK_AT, 0, 1).toFixed(2));
@@ -150,13 +169,30 @@ function renderChoices(card) {
     });
 }
 
+// No fim do jogo, a carta dá lugar ao que cada decisão deixou no planeta.
+function renderEnd() {
+    el.endTitle.textContent = ENDINGS[endingOf(game)].title;
+    el.endNotes.replaceChildren(
+        ...worldNotes(game).map((note) => {
+            const item = document.createElement("li");
+            item.className = note.tone;
+            item.textContent = note.text;
+            return item;
+        })
+    );
+}
+
 function renderCard() {
     const card = currentCard(game);
 
-    el.question.hidden = Boolean(pendingResult);
-    el.result.hidden = !pendingResult;
+    el.question.hidden = viewing || Boolean(pendingResult);
+    el.result.hidden = viewing || !pendingResult;
+    el.end.hidden = !viewing;
+    el.cardLabel.textContent = viewing ? "SEU PLANETA" : "A SITUAÇÃO";
 
-    if (pendingResult) {
+    if (viewing) {
+        renderEnd();
+    } else if (pendingResult) {
         el.resultText.textContent = pendingResult.option.result;
         el.resultChips.innerHTML = chipsHtml(resultChips(pendingResult));
     } else if (card) {
@@ -233,7 +269,33 @@ function showHowTo({ quiet = false } = {}) {
 
 /* ---------- jogar ---------- */
 
+// Volta o totem no lugar do planeta em 3D.
+function leavePlanet() {
+    if (!viewing) return;
+
+    viewing = false;
+    planet?.clear();
+    el.worldStage.hidden = true;
+    el.totemStage.hidden = false;
+}
+
+// Troca o totem pelo planeta em 3D, bonito ou feio conforme as decisões da partida.
+function viewPlanet() {
+    closeModal();
+    viewing = true;
+
+    el.totemStage.hidden = true;
+    el.worldStage.hidden = false;
+    planet ??= createWorld(el.worldStage);
+    planet.show(worldOf(game));
+    el.worldStage.setAttribute("aria-label", `O planeta que você construiu, em blocos e em 3D. ${worldMessage(game)} Mova o mouse sobre ele para girar.`);
+
+    el.world.style.setProperty("--smog", "0"); // o céu do planeta já mostra como está o ar
+    render();
+}
+
 function startGame() {
+    leavePlanet();
     game = newGame();
     pendingResult = null;
     shown = {};
@@ -297,7 +359,7 @@ function showEnd() {
                     startGame();
                 },
             },
-            { html: "Ver o planeta", kind: "secondary", onClick: closeModal },
+            { html: "Ver o planeta", kind: "secondary", onClick: viewing ? closeModal : viewPlanet },
         ],
     });
 }
@@ -306,6 +368,8 @@ function showEnd() {
 /* ---------- ligações ---------- */
 
 el.continueBtn.addEventListener("click", continueAfterResult);
+el.again.addEventListener("click", startGame);
+el.resultBtn.addEventListener("click", showEnd);
 el.howTo.addEventListener("click", () => showHowTo());
 
 buildPips();

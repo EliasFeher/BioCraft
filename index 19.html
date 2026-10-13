@@ -306,8 +306,8 @@
             </div>
 
             <figure class="project-photo">
-                <img src="imagens/prototipo.jpg"
-                    alt="Protótipo físico do BioCraft: um cilindro de vidro sobre um bloco de grama do Minecraft, com um Creeper e uma árvore">
+                <img src="imagens/prototipo.webp" width="829" height="1406" loading="lazy"
+                    alt="Protótipo físico da BioCraft: um cilindro de vidro com argila preta sobre um bloco de grama do Minecraft, com um Creeper, uma galinha e uma nuvem de algodão com o totem na tampa">
                 <figcaption>
                     <span>O PROTÓTIPO</span>
                     <strong>O nosso projeto</strong>
@@ -372,7 +372,7 @@
                     </div>
                 </div>
 
-                <!-- PLANETA: a situação atual e o totem -->
+                <!-- PLANETA: a situação atual e o totem (no fim do jogo, o totem dá lugar ao planeta em 3D) -->
                 <div class="game-world" id="gameWorld">
                     <div class="step-bar">
                         <span>SITUAÇÃO <strong id="gameStep">1</strong> DE 7</span>
@@ -380,13 +380,15 @@
                     </div>
 
                     <div class="totem-stage" id="totemStage"></div>
+                    <div class="totem-stage" id="worldStage" role="img"
+                        aria-label="O planeta que você construiu, em blocos de Minecraft e em 3D. Passe o mouse para girar." hidden></div>
 
                     <p class="game-message" id="gameMessage"></p>
                 </div>
 
                 <!-- A SITUAÇÃO: a carta com as duas escolhas -->
                 <div class="game-actions">
-                    <span class="game-label">A SITUAÇÃO</span>
+                    <span class="game-label" id="cardLabel">A SITUAÇÃO</span>
 
                     <div class="game-card">
                         <div class="card-question" id="cardQuestion">
@@ -408,6 +410,14 @@
                             <p id="resultText"></p>
                             <div class="chips" id="resultChips"></div>
                             <button class="end-year" id="continueBtn" type="button">Continuar</button>
+                        </div>
+
+                        <div class="card-end" id="cardEnd" hidden>
+                            <h3 id="endTitle"></h3>
+                            <ul class="end-notes" id="endNotes"></ul>
+                            <button class="end-year" id="againBtn" type="button">Jogar de novo</button>
+                            <button class="end-link" id="resultBtn" type="button">Ver o resultado</button>
+                            <p class="end-hint">Mova o mouse ou o dedo sobre o planeta para girar.</p>
                         </div>
                     </div>
 

@@ -24,12 +24,14 @@ export const CARDS = [
         text: "Uma Árvore-Líquida da praça central parou de circular a água e as algas estão ficando amarelas. O reparo custa R$ 8 mil. Se esperar, ela talvez se recupere sozinha… ou não.",
         options: [
             {
-                label: "Consertar agora",                economy: -12,
+                label: "Consertar agora",
+                economy: -12,
                 sustainability: 10,
                 result: "Em dois dias o tanque voltou a ficar verde e a absorver CO₂. O reparo pesou no caixa, mas a praça continua respirando.",
             },
             {
-                label: "Deixar assim",                economy: 6,
+                label: "Deixar assim",
+                economy: 6,
                 sustainability: -14,
                 result: "Você poupou o reparo, mas sem circulação as algas morreram em uma semana. O tanque virou só uma caixa d’água parada.",
             },
@@ -42,12 +44,14 @@ export const CARDS = [
         text: "A prefeitura quer 10 Árvores-Líquidas na avenida nova, prontas em 30 dias. Só dá para cumprir o prazo se o teste de qualidade da água for pulado.",
         options: [
             {
-                label: "Pular o teste",                economy: 14,
+                label: "Pular o teste",
+                economy: 14,
                 sustainability: -10,
                 result: "Tudo ficou pronto no prazo e o contrato rendeu bem. Mas dois tanques entraram com a água fora do padrão e as algas sofreram.",
             },
             {
-                label: "Pedir mais prazo",                economy: -6,
+                label: "Pedir mais prazo",
+                economy: -6,
                 sustainability: 9,
                 result: "O prefeito reclamou do atraso, mas as dez árvores entraram em funcionamento testadas e seguras.",
             },
@@ -60,12 +64,14 @@ export const CARDS = [
         text: "Uma investidora quer financiar uma fábrica de tanques e dobrar a produção. A condição é usar plástico barato, sem reciclagem, para baixar o custo.",
         options: [
             {
-                label: "Recusar a condição",                economy: -4,
+                label: "Recusar a condição",
+                economy: -4,
                 sustainability: 8,
                 result: "Você seguiu com material reciclado. Cresceu mais devagar, mas sem deixar lixo pelo caminho.",
             },
             {
-                label: "Aceitar o dinheiro",                economy: 18,
+                label: "Aceitar o dinheiro",
+                economy: 18,
                 sustainability: -14,
                 result: "A fábrica abriu e os lucros subiram. Em troca, toneladas de plástico novo passaram a ser descartadas todo ano.",
             },
@@ -78,12 +84,14 @@ export const CARDS = [
         text: "A escola do bairro quer levar 120 alunos para conhecer a Árvore-Líquida. Receber a turma pede um dia sem manutenção e uma equipe de apoio.",
         options: [
             {
-                label: "Adiar a visita",                economy: 4,
+                label: "Adiar a visita",
+                economy: 4,
                 sustainability: -5,
                 result: "A manutenção seguiu em dia, mas a escola ficou chateada e o bairro perdeu a chance de conhecer o projeto.",
             },
             {
-                label: "Receber a turma",                economy: -6,
+                label: "Receber a turma",
+                economy: -6,
                 sustainability: 12,
                 result: "As crianças voltaram para casa querendo cuidar das algas. Os pais passaram a apoiar o projeto no bairro.",
             },
@@ -96,12 +104,14 @@ export const CARDS = [
         text: "É dia de trocar a água dos tanques, cheia de nutrientes. Tratar antes de descartar custa R$ 5 mil. Despejar no córrego é de graça e ninguém fiscaliza.",
         options: [
             {
-                label: "Tratar a água",                economy: -9,
+                label: "Tratar a água",
+                economy: -9,
                 sustainability: 10,
                 result: "A água saiu limpa e ainda virou adubo para os canteiros da praça. Custou caro, mas o córrego continuou limpo.",
             },
             {
-                label: "Despejar no córrego",                economy: 8,
+                label: "Despejar no córrego",
+                economy: 8,
                 sustainability: -18,
                 result: "Deu certo por uma semana. Depois o córrego ficou verde e fedido, e os moradores descobriram de onde vinha.",
             },
@@ -114,12 +124,14 @@ export const CARDS = [
         text: "Um pesquisador da universidade achou uma alga que captura 30% mais CO₂. Para usá-la, é preciso trocar a água e adaptar todos os tanques.",
         options: [
             {
-                label: "Manter como está",                economy: 6,
+                label: "Manter como está",
+                economy: 6,
                 sustainability: 0,
                 result: "Nada mudou: o caixa respirou, mas a BioCraft perdeu a chance de capturar mais carbono.",
             },
             {
-                label: "Investir na nova alga",                economy: -14,
+                label: "Investir na nova alga",
+                economy: -14,
                 sustainability: 16,
                 result: "Os tanques passaram a capturar bem mais CO₂. O investimento foi alto, mas a BioCraft virou referência na região.",
             },
@@ -132,12 +144,14 @@ export const CARDS = [
         text: "A maior fábrica da cidade quer pagar a BioCraft para “compensar” as emissões dela no papel, sem reduzir nada. O contrato é enorme.",
         options: [
             {
-                label: "Exigir que ela reduza",                economy: -8,
+                label: "Exigir que ela reduza",
+                economy: -8,
                 sustainability: 14,
                 result: "A fábrica resistiu, mas aceitou um plano para emitir menos. Compensar só funciona quando a poluição cai de verdade.",
             },
             {
-                label: "Assinar o contrato",                economy: 20,
+                label: "Assinar o contrato",
+                economy: 20,
                 sustainability: -16,
                 result: "O dinheiro entrou e a fábrica continuou poluindo, agora com uma faixa de “carbono neutro” na entrada.",
             },
@@ -153,6 +167,7 @@ export function newGame() {
         economy: START.economy,
         sustainability: START.sustainability,
         step: 0, // quantas cartas já foram respondidas
+        picks: [], // o lado escolhido em cada carta: 0 (esquerda) ou 1 (direita)
         over: null, // null enquanto joga; depois "falencia", "colapso" ou "fim"
     };
 }
@@ -174,6 +189,7 @@ export function choose(game, side) {
 
     game.economy = clamp(game.economy + option.economy, 0, 100);
     game.sustainability = clamp(game.sustainability + option.sustainability, 0, 100);
+    game.picks.push(side);
     game.step += 1;
 
     // o totem quebra quando um lado deixa o outro muito para trás
@@ -254,3 +270,72 @@ export function totemMessage(game) {
     if (health >= 25) return `Peças estão caindo! Cuide ${behind.of}.`;
     return `O totem está quase se desfazendo! Cuide ${behind.of} agora.`;
 }
+
+
+/* ---------- o planeta no fim do jogo ---------- */
+
+// Transforma a partida num "plano" do planeta em 3D.
+// green e wealth vão de 0 a 1. Em choices fica o lado escolhido em cada carta (0 ou 1),
+// ou null se o jogo acabou antes de chegar nela.
+export function worldOf(game) {
+    const choices = {};
+    CARDS.forEach((card, i) => (choices[card.id] = i < game.picks.length ? game.picks[i] : null));
+
+    // a mesma partida sempre gera o mesmo planeta
+    let seed = 7;
+    game.picks.forEach((side, i) => (seed = (Math.imul(seed, 31) + side + 1 + i * 7) | 0));
+    seed = (Math.imul(seed, 131) + game.economy * 17 + game.sustainability * 29) >>> 0;
+
+    return {
+        // a natureza depende da sustentabilidade, e o equilíbrio dá um empurrãozinho: quem manteve os dois lados juntos ganha um planeta mais bonito
+        green: clamp(game.sustainability / 100 + (0.15 * totemHealth(game)) / 100, 0, 1),
+        wealth: game.economy / 100,
+        closed: game.over === "falencia",
+        choices,
+        seed,
+    };
+}
+
+// O que cada escolha deixou no planeta, para a pessoa ligar o que decidiu ao que está vendo.
+const WORLD_NOTES = {
+    defeito: [
+        { tone: "good", text: "A Árvore-Líquida da praça foi consertada e continua limpando o ar." },
+        { tone: "bad", text: "A Árvore-Líquida da praça ficou quebrada, com as algas mortas." },
+    ],
+    prazo: [
+        { tone: "bad", text: "A avenida ganhou as árvores no prazo, mas dois tanques ficaram com água fora do padrão." },
+        { tone: "good", text: "As árvores da avenida foram testadas e entraram em funcionamento seguras." },
+    ],
+    investidora: [
+        { tone: "good", text: "A fábrica usa material reciclado e não deixa lixo pelo caminho." },
+        { tone: "bad", text: "A fábrica nova espalha plástico pela ilha." },
+    ],
+    escola: [
+        { tone: "bad", text: "A escola não visitou o projeto e o bairro ficou de fora." },
+        { tone: "good", text: "As crianças da escola plantaram mudas e cuidam das algas." },
+    ],
+    agua: [
+        { tone: "good", text: "O córrego continua limpo, porque a água dos tanques foi tratada." },
+        { tone: "bad", text: "O córrego ficou verde e tóxico." },
+    ],
+    alga: [
+        { tone: "neutral", text: "A BioCraft manteve as algas antigas e captura menos carbono." },
+        { tone: "good", text: "A nova alga capturou mais CO₂ e virou referência na região." },
+    ],
+    contrato: [
+        { tone: "good", text: "A metalúrgica aceitou emitir menos e a fumaça diminuiu." },
+        { tone: "bad", text: "A metalúrgica seguiu poluindo, agora com uma faixa de carbono neutro." },
+    ],
+};
+
+export const worldNotes = (game) => game.picks.map((side, i) => WORLD_NOTES[CARDS[i].id][side]);
+
+const WORLD_MESSAGES = {
+    equilibrio: "Um planeta verde, com a cidade funcionando em harmonia.",
+    planeta: "A natureza está linda, mas a cidade é pequena por falta de caixa.",
+    lucro: "A cidade é rica, mas o ar e o córrego pagam a conta.",
+    falencia: "A natureza está viva, mas a empresa fechou e os tanques apagaram.",
+    colapso: "A cidade enriqueceu, mas o planeta não aguentou.",
+};
+
+export const worldMessage = (game) => WORLD_MESSAGES[endingOf(game)];

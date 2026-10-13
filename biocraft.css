@@ -87,6 +87,7 @@ h2 {
 }
 
 .nav-links {
+    position: relative;
     display: flex;
     gap: 34px;
     margin-left: auto;
@@ -97,7 +98,11 @@ h2 {
     color: #294238;
     font-size: 14px;
     font-weight: 500;
-    transition: color 0.2s;
+    transition: color 0.2s, transform 0.12s;
+}
+
+.nav-links a:active {
+    transform: translateY(1px);
 }
 
 .nav-links a::after {
@@ -108,15 +113,25 @@ h2 {
     width: 0;
     height: 2px;
     background: var(--green);
-    transition: width 0.2s;
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links a.active {
     color: var(--green);
 }
 
-.nav-links a:hover::after {
+/* passar o mouse cresce o sublinhado; o link da seção atual já fica com ele inteiro, sem animar */
+.nav-links a:not(.active):hover::after {
     width: 100%;
+    transition: width 0.2s;
+}
+
+.nav-links a.active::after {
+    width: 100%;
+}
+
+section:focus {
+    outline: none;
 }
 
 .btn-navbar {
@@ -931,13 +946,14 @@ h2 {
     align-items: center;
 }
 
-/* o fundo branco da foto some contra a cor da seção */
+/* foto recortada, sem fundo: só uma sombra suave para ela não ficar solta na página */
 .project-photo img {
     display: block;
     width: 100%;
-    max-width: 490px;
+    max-width: 300px;
+    height: auto;
     justify-self: center;
-    mix-blend-mode: multiply;
+    filter: drop-shadow(0 14px 18px rgba(3, 32, 18, 0.28));
 }
 
 .project-photo span {
@@ -1195,7 +1211,8 @@ h2 {
 }
 
 .card-question,
-.card-result {
+.card-result,
+.card-end {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -1203,8 +1220,62 @@ h2 {
 }
 
 .card-question[hidden],
-.card-result[hidden] {
+.card-result[hidden],
+.card-end[hidden] {
     display: none;
+}
+
+/* o que cada decisão deixou no planeta, com um quadradinho verde, vermelho ou cinza */
+.end-notes {
+    margin: 12px 0 4px;
+    display: grid;
+    gap: 7px;
+    list-style: none;
+}
+
+.end-notes li {
+    display: flex;
+    gap: 9px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: #35493f;
+}
+
+.end-notes li::before {
+    content: "";
+    flex: none;
+    width: 9px;
+    height: 9px;
+    margin-top: 4px;
+    background: #8a9a92;
+}
+
+.end-notes li.good::before {
+    background: #2fb457;
+}
+
+.end-notes li.bad::before {
+    background: #d94a3d;
+}
+
+.end-hint {
+    margin-top: 4px;
+    font-size: 12px;
+    text-align: center;
+    color: #55645b;
+}
+
+.end-link {
+    align-self: center;
+    margin-top: 8px;
+    padding: 6px 12px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--green);
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .card-person {
