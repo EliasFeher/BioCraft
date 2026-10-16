@@ -27,7 +27,7 @@ $("navLinks").addEventListener("click", () => {
 const modelContainer = $("model-container");
 
 if (modelContainer) {
-    const stage = createStage(modelContainer, { fov: 40, z: 9.5 });
+    const stage = createStage(modelContainer, { fov: 40, z: 8.2 });
 
     stage.scene.add(new THREE.AmbientLight(0xffffff, 1.9));
     const sun = new THREE.DirectionalLight(0xffffff, 2.6);
@@ -92,6 +92,9 @@ if (modelContainer) {
     stage.scene.add(island);
 
     stage.onFrame = (time, dt) => {
+        // grande no desktop; num espaço mais alto que largo (celular) afasta um pouco para a ilha não cortar nas laterais
+        stage.camera.position.z = stage.camera.aspect < 1 ? 9.5 : 8.2;
+
         if (pointer.over) {
             target.y = HOME.y + (pointer.x - 0.5) * 1.6;
             target.x = HOME.x + (pointer.y - 0.5) * 0.6;
