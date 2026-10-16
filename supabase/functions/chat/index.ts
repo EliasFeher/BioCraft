@@ -15,7 +15,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 // Tenta na ordem: se um modelo estiver sobrecarregado ou fora do ar, passa para o próximo.
-const MODELS = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
+// Pensar antes de responder é o que mais demora: o 3.8-flash gastou 561 tokens (15 s) para uma
+// resposta de 35. Com thinkingBudget 0 ele responde em ~3 s. O flash-lite não aceita o campo.
+const MODELS = [
+    { name: "gemini-3.5-flash", noThinking: true },
+    { name: "gemini-3.8-flash", noThinking: true },
+    { name: "gemini-3.5-flash-lite", noThinking: false },
+];
 const RATE_LIMIT = 20; // mensagens por minuto de cada pessoa
 const MAX_MESSAGE_CHARS = 500; // tamanho máximo de cada pergunta
 const MAX_HISTORY = 20; // mensagens anteriores que a conversa lembra
@@ -94,12 +100,7 @@ async function allowed(ip: string): Promise<boolean> {
     return (await response.json()) === true;
 }
 
-// Pensar antes de responder é o que mais demora num modelo flash. Para um assistente de
-// respostas curtas o nível mínimo basta. Se algum modelo recusar esse campo (400), a função
-// tenta de novo sem ele e deixa de mandar.
-let thinkingOk = true;
-
-function buildBody(history: Turn[], question: string, thinking: boolean): string {
+function buildBody(history: Turn[], question: string, noThinking: boolean): string {
     return JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents: [...history, { role: "user", text: question }].map((t) => ({
@@ -108,7 +109,7 @@ function buildBody(history: Turn[], question: string, thinking: boolean): string
         })),
         generationConfig: {
             maxOutputTokens: MAX_OUTPUT_TOKENS,
-            ...(thinking ? { thinkingConfig: { thinkingLevel: "minimal" } } : {}),
+            ...(noThinking ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
         },
     });
 }
@@ -139,12 +140,12 @@ async function openGemini(history: Turn[], question: string): Promise<Response> 
 
     const failures: string[] = [];
 
-    for (const model of MODELS) {
+    for (const { name: model, noThinking } of MODELS) {
         try {
-            let response = await callModel(model, buildBody(history, question, thinkingOk), apiKey);
+            let response = await callModel(model, buildBody(history, question, noThinking), apiKey);
 
-            if (response.status === 400 && thinkingOk) {
-                thinkingOk = false;
+            // se o Google deixar de aceitar o thinkingConfig nesse modelo, tenta sem ele
+            if (response.status === 400 && noThinking) {
                 console.log("Modelo recusou o thinkingConfig, seguindo sem ele:", model);
                 response = await callModel(model, buildBody(history, question, false), apiKey);
             }
