@@ -1072,11 +1072,6 @@ section:focus {
     color: #4a5f56;
 }
 
-.project-photo p + p {
-    margin-top: 14px;
-}
-
-
 /* faixa verde com a frase do projeto */
 
 .quote-band {
