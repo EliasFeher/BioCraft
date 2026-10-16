@@ -43,16 +43,60 @@ function setOpen(open) {
     }
 }
 
-async function ask(question) {
+// Lê a resposta em pedaços (data: {"t":"texto"}) e chama onText com o texto até agora.
+async function readStream(response, onText) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let text = "";
+
+    try {
+        for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer = (buffer + decoder.decode(value, { stream: true })).replaceAll("\r\n", "\n");
+
+            let end;
+            while ((end = buffer.indexOf("\n\n")) !== -1) {
+                const line = buffer.slice(0, end);
+                buffer = buffer.slice(end + 2);
+                if (!line.startsWith("data:")) continue;
+
+                try {
+                    text += JSON.parse(line.slice(5)).t ?? "";
+                    onText(text);
+                } catch {
+                    // pedaço quebrado: ignora
+                }
+            }
+        }
+    } catch (error) {
+        // a conexão caiu no meio: se já chegou texto, mostra o que veio
+        if (!text) throw error;
+    }
+
+    if (!text) throw new Error("resposta vazia");
+    return text;
+}
+
+async function ask(question, onText) {
+    // text/plain não precisa de pré-checagem (preflight) do navegador; a função lê o JSON do mesmo jeito
     const response = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
         body: JSON.stringify({ mensagem: question, historico: history.slice(-MAX_HISTORY) }),
     });
 
     if (response.status === 429) return { text: TOO_FAST, ok: false };
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return { text: (await response.json()).resposta, ok: true };
+
+    // a versão antiga da função respondia tudo de uma vez em JSON
+    if (!response.headers.get("content-type")?.includes("text/event-stream")) {
+        return { text: (await response.json()).resposta, ok: true };
+    }
+
+    return { text: await readStream(response, onText), ok: true };
 }
 
 el.form.addEventListener("submit", async (event) => {
@@ -69,7 +113,11 @@ el.form.addEventListener("submit", async (event) => {
     const typing = addMessage("Digitando...", "bot typing");
 
     try {
-        const answer = await ask(question);
+        const answer = await ask(question, (partial) => {
+            typing.classList.remove("typing");
+            typing.textContent = partial;
+            el.messages.scrollTop = el.messages.scrollHeight;
+        });
         typing.textContent = answer.text;
         // só entra no histórico o que o assistente respondeu de verdade
         if (answer.ok) history.push({ role: "user", text: question }, { role: "model", text: answer.text });

@@ -8,6 +8,9 @@
 //
 // O site manda a pergunta e as últimas mensagens da conversa; a função não guarda nada,
 // só registra o horário de cada mensagem para o limite por pessoa (tabela chat_requests).
+//
+// A resposta volta em pedaços (text/event-stream), cada um no formato  data: {"t":"texto"},
+// para o site mostrar as palavras assim que o Gemini começa a escrever.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
@@ -17,6 +20,9 @@ const RATE_LIMIT = 20; // mensagens por minuto de cada pessoa
 const MAX_MESSAGE_CHARS = 500; // tamanho máximo de cada pergunta
 const MAX_HISTORY = 20; // mensagens anteriores que a conversa lembra
 const MAX_HISTORY_CHARS = 1500; // tamanho máximo de cada mensagem anterior
+const MAX_OUTPUT_TOKENS = 600; // as respostas têm no máximo 4 frases, sobra folga
+const FIRST_BYTE_TIMEOUT_MS = 8000; // se o modelo não começar a responder nesse tempo, passa para o próximo
+const EMPTY_REPLY = "Não sei te responder isso.";
 
 const SYSTEM_PROMPT = `
 Você é o assistente virtual da BioCraft, um projeto de 8 estudantes da FIAP School
@@ -55,6 +61,8 @@ function corsHeaders(origin: string | null): Record<string, string> {
         "Access-Control-Allow-Origin": allow,
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "content-type, authorization, apikey, x-client-info",
+        // o navegador guarda a resposta do preflight por um dia, em vez de perguntar a cada mensagem
+        "Access-Control-Max-Age": "86400",
         Vary: "Origin",
     };
 }
@@ -86,41 +94,118 @@ async function allowed(ip: string): Promise<boolean> {
     return (await response.json()) === true;
 }
 
-async function askGemini(history: Turn[], question: string): Promise<string> {
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!apiKey) throw new Error("GEMINI_API_KEY não configurada");
+// Pensar antes de responder é o que mais demora num modelo flash. Para um assistente de
+// respostas curtas o nível mínimo basta. Se algum modelo recusar esse campo (400), a função
+// tenta de novo sem ele e deixa de mandar.
+let thinkingOk = true;
 
-    const body = JSON.stringify({
+function buildBody(history: Turn[], question: string, thinking: boolean): string {
+    return JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents: [...history, { role: "user", text: question }].map((t) => ({
             role: t.role,
             parts: [{ text: t.text }],
         })),
+        generationConfig: {
+            maxOutputTokens: MAX_OUTPUT_TOKENS,
+            ...(thinking ? { thinkingConfig: { thinkingLevel: "minimal" } } : {}),
+        },
     });
+}
+
+// A resposta (os cabeçalhos) chega quando o modelo começa a escrever; o tempo limite vale só até lá.
+async function callModel(model: string, body: string, apiKey: string): Promise<Response> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FIRST_BYTE_TIMEOUT_MS);
+    try {
+        return await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+                body,
+                signal: controller.signal,
+            },
+        );
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+// Abre a resposta em pedaços do primeiro modelo que estiver funcionando.
+async function openGemini(history: Turn[], question: string): Promise<Response> {
+    const apiKey = Deno.env.get("GEMINI_API_KEY");
+    if (!apiKey) throw new Error("GEMINI_API_KEY não configurada");
 
     const failures: string[] = [];
 
     for (const model of MODELS) {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-            { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey }, body },
-        );
+        try {
+            let response = await callModel(model, buildBody(history, question, thinkingOk), apiKey);
 
-        if (!response.ok) {
+            if (response.status === 400 && thinkingOk) {
+                thinkingOk = false;
+                console.log("Modelo recusou o thinkingConfig, seguindo sem ele:", model);
+                response = await callModel(model, buildBody(history, question, false), apiKey);
+            }
+
+            if (response.ok) {
+                if (failures.length) console.log("Modelo de reserva usado:", model, "| falharam:", failures.join(", "));
+                return response;
+            }
+
             failures.push(`${model} ${response.status}`);
             // sobrecarga, limite de uso ou modelo indisponível: tenta o próximo da lista
             if ([404, 429, 500, 503].includes(response.status)) continue;
             throw new Error(`Gemini ${failures.join(", ")}: ${(await response.text()).slice(0, 300)}`);
+        } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                failures.push(`${model} demorou demais`);
+                continue;
+            }
+            throw error;
         }
-
-        const data = await response.json();
-        const parts = data?.candidates?.[0]?.content?.parts ?? [];
-        const text = parts.map((p: { text?: string }) => p.text ?? "").join("").trim();
-        if (failures.length) console.log("Modelo de reserva usado:", model, "| falharam:", failures.join(", "));
-        return text || "Não sei te responder isso.";
     }
 
     throw new Error(`Gemini: todos os modelos falharam (${failures.join(", ")})`);
+}
+
+// Converte os eventos do Gemini nos pedaços simples que o site lê: data: {"t":"texto"}
+function textEvents(): TransformStream<string, string> {
+    let buffer = "";
+    let sent = false;
+
+    const handle = (event: string, controller: TransformStreamDefaultController<string>) => {
+        for (const line of event.split("\n")) {
+            if (!line.startsWith("data:")) continue;
+            try {
+                const data = JSON.parse(line.slice(5));
+                const parts = data?.candidates?.[0]?.content?.parts ?? [];
+                const text = parts.map((p: { text?: string }) => p.text ?? "").join("");
+                if (text) {
+                    sent = true;
+                    controller.enqueue(`data: ${JSON.stringify({ t: text })}\n\n`);
+                }
+            } catch {
+                // pedaço que não é JSON (ex: comentário do servidor): ignora
+            }
+        }
+    };
+
+    return new TransformStream<string, string>({
+        transform(chunk, controller) {
+            buffer = (buffer + chunk).replaceAll("\r\n", "\n");
+            let end: number;
+            while ((end = buffer.indexOf("\n\n")) !== -1) {
+                handle(buffer.slice(0, end), controller);
+                buffer = buffer.slice(end + 2);
+            }
+        },
+        flush(controller) {
+            if (buffer.trim()) handle(buffer, controller);
+            if (!sent) controller.enqueue(`data: ${JSON.stringify({ t: EMPTY_REPLY })}\n\n`);
+        },
+    });
 }
 
 Deno.serve(async (req) => {
@@ -146,7 +231,15 @@ Deno.serve(async (req) => {
     if (!(await allowed(ip))) return reply({ erro: "Muitas mensagens seguidas. Espere um minuto." }, 429);
 
     try {
-        return reply({ resposta: await askGemini(cleanHistory(payload.historico), question) });
+        const upstream = await openGemini(cleanHistory(payload.historico), question);
+        const stream = upstream.body!
+            .pipeThrough(new TextDecoderStream())
+            .pipeThrough(textEvents())
+            .pipeThrough(new TextEncoderStream());
+
+        return new Response(stream, {
+            headers: { ...cors, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
+        });
     } catch (error) {
         console.error("ERRO:", error);
         return reply({ erro: "Não consegui falar com o Gemini agora" }, 500);
