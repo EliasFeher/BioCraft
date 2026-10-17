@@ -1121,6 +1121,16 @@ section:focus {
     padding: 90px 8vw;
 }
 
+/* só o título, largo o bastante para ficar numa linha */
+.game-section .section-header {
+    max-width: 900px;
+    margin-bottom: 45px;
+}
+
+.game-section .section-header h2 {
+    margin-bottom: 0;
+}
+
 .game {
     position: relative;
     max-width: 1100px;
