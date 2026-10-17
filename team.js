@@ -7,7 +7,7 @@ import { pixelPortrait } from "./pixel-art.js";
 //   narrow   true deixa os olhos mais estreitos
 //   freckles true coloca sardas
 const MEMBERS = [
-    { name: "Elias Feher", role: "CEO (Tech)", look: { style: "wavy", skin: "#c8956a", hair: "#2b1d14", shirt: "#1f7a4a" } },
+    { name: "Elias Feher", role: "CEO (Tech)", look: { style: "wavy", skin: "#d9a97e", hair: "#2b1d14", shirt: "#1f7a4a" } },
     { name: "Rafael Pires", role: "COO (Design)", look: { style: "bangs", skin: "#f0d2a8", hair: "#14100c", shirt: "#42b8dc" } },
     { name: "Leonardo Tasca", role: "Desenvolvedor Back End", look: { style: "curly", skin: "#f1c9a0", hair: "#4a2f1c", shirt: "#7a4fa3" } },
     { name: "Bernardo Silva", role: "Designer", look: { style: "short", skin: "#f3d2b3", hair: "#c8641f", shirt: "#d9a441", freckles: true } },
