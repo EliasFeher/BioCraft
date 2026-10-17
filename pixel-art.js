@@ -370,6 +370,112 @@ SPRITES.heartHalf = {
 // Monta um SVG com um retângulo por sequência de pixels da mesma cor.
 export function pixelIcon(name, scale = 3) {
     const { rows, palette } = SPRITES[name];
+    return render(rows, palette, scale);
+}
+
+// Rostinhos da equipe: quatro cortes de cabelo, com cor de pele, cabelo e camisa à escolha.
+// Cada corte desenha só a cabeça (8 linhas); o queixo, o pescoço e a camisa são iguais em todos.
+const BODY_ROWS = [
+    "..SSSSSSSSSS..",
+    "....SSSSSS....",
+    ".CCCCCSSCCCCC.",
+    "CCCCCCCCCCCCCC",
+    "CCCCCCCCCCCCCC",
+    "CCCCCCccCCCCCC",
+    "CCCCCCccCCCCCC",
+    "cCCCCCccCCCCCc",
+];
+
+const HEAD_ROWS = {
+    // curto, com a franja jogada para o lado
+    short: [
+        "...HHHHHHHH...",
+        "..HHHHHHHHHH..",
+        ".HHHHHHHHHHHH.",
+        ".HHHHHHHHHHHH.",
+        ".HHHSSSSSSSSH.",
+        ".SSSKSSSSKSSS.",
+        ".SSSSSssSSSSS.",
+        ".SSSSSSSSSSSS.",
+    ],
+    // liso, com a franja reta cobrindo a testa
+    bangs: [
+        "...HHHHHHHH...",
+        "..HHHHHHHHHH..",
+        ".HHHHHHHHHHHH.",
+        ".HHHHHHHHHHHH.",
+        ".HHSSSSSSSSHH.",
+        ".HSSKSSSSKSSH.",
+        ".SSSSSssSSSSS.",
+        ".SSSSSSSSSSSS.",
+    ],
+    // ondulado: topo irregular, com mechas que descem pelas laterais
+    wavy: [
+        "..HH.HHHHH.HH.",
+        ".HHhHHHHHHhHHH",
+        "HHHHhHHHHhHHHH",
+        "HHHHHHHHHHHHHH",
+        "HHHSSSSSSSSHHH",
+        "HHSSKSSSSKSSHH",
+        "HHSSSSssSSSSHH",
+        ".SSSSSSSSSSSS.",
+    ],
+    // cacheado: bem mais volume, cheio de cachos
+    curly: [
+        ".HHH.HHHH.HHH.",
+        "HHHHHHHHHHHHHH",
+        "HHhHHHHHHHHhHH",
+        "HHHHHhHHHhHHHH",
+        "HHHSSSSSSSSHHH",
+        "HHSSKSSSSKSSHH",
+        "HHSSSSssSSSSHH",
+        "hHSSSSSSSSSSHh",
+    ],
+};
+
+// escurece uma cor em #rrggbb para fazer as sombras do rostinho
+function darken(hex, amount) {
+    const n = parseInt(hex.slice(1), 16);
+    const channel = (shift) => Math.round(((n >> shift) & 255) * (1 - amount));
+    return `#${[16, 8, 0].map((shift) => channel(shift).toString(16).padStart(2, "0")).join("")}`;
+}
+
+// olhos mais estreitos: cada olho ganha um pixel para o lado de fora
+function narrowEyes(row) {
+    const cells = [...row];
+    [...row].forEach((cell, i) => {
+        if (cell === "K") cells[i < row.length / 2 ? i - 1 : i + 1] = "K";
+    });
+    return cells.join("");
+}
+
+// sardas: pontinhos mais escuros nas bochechas
+function addFreckles(row) {
+    return [...row].map((cell, i) => (cell === "S" && [3, 4, 9, 10].includes(i) ? "f" : cell)).join("");
+}
+
+export function pixelPortrait({ style = "short", skin, hair, shirt, narrow = false, freckles = false }, scale = 6) {
+    const head = [...HEAD_ROWS[style]];
+    if (narrow) head[5] = narrowEyes(head[5]);
+    if (freckles) head[6] = addFreckles(head[6]);
+
+    return render(
+        [...head, ...BODY_ROWS],
+        {
+            K: "#201a14",
+            S: skin,
+            s: darken(skin, 0.15),
+            f: darken(skin, 0.28),
+            H: hair,
+            h: darken(hair, 0.3),
+            C: shirt,
+            c: darken(shirt, 0.2),
+        },
+        scale,
+    );
+}
+
+function render(rows, palette, scale) {
     const width = rows[0].length;
     const height = rows.length;
     let rects = "";
