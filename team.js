@@ -6,12 +6,16 @@ import { pixelPortrait } from "./pixel-art.js";
 //   skin, hair e shirt   as cores, em #rrggbb
 //   narrow   true deixa os olhos mais estreitos
 //   freckles true coloca sardas
+//   glasses  true coloca óculos
 const MEMBERS = [
     { name: "Elias Feher", role: "CEO (Tech)", look: { style: "wavy", skin: "#d9a97e", hair: "#2b1d14", shirt: "#1f7a4a" } },
     { name: "Rafael Pires", role: "COO (Design)", look: { style: "bangs", skin: "#f0d2a8", hair: "#14100c", shirt: "#42b8dc" } },
-    { name: "Leonardo Tasca", role: "Desenvolvedor Back End", look: { style: "curly", skin: "#f1c9a0", hair: "#4a2f1c", shirt: "#7a4fa3" } },
-    { name: "Bernardo Silva", role: "Designer", look: { style: "short", skin: "#f3d2b3", hair: "#c8641f", shirt: "#d9a441", freckles: true } },
-    { name: "Enzo Jordão", role: "Desenvolvedor Front End", look: { style: "short", skin: "#e8b486", hair: "#3a2a1e", shirt: "#c4503f" } },
+    { name: "Leonardo Tasca", role: "Back-End", look: { style: "curly", skin: "#f1c9a0", hair: "#4a2f1c", shirt: "#7a4fa3" } },
+    { name: "Bernardo Silva", role: "Back-End", look: { style: "short", skin: "#f3d2b3", hair: "#c8641f", shirt: "#d9a441", freckles: true } },
+    { name: "Enzo Jordão", role: "Back-End", look: { style: "short", skin: "#e8b486", hair: "#3a2a1e", shirt: "#c4503f" } },
+    { name: "Lucas Capel", role: "Designer", look: { style: "bangs", skin: "#f8dcc4", hair: "#b08a52", shirt: "#e8703a" } },
+    { name: "Arthur Boneti", role: "Designer", look: { style: "wavy", skin: "#f5dcc0", hair: "#8a5a2b", shirt: "#3a6ea5", narrow: true } },
+    { name: "Felipe Scherrer", role: "Designer", look: { style: "curly", skin: "#f8e0c8", hair: "#a9784a", shirt: "#2f8f94" } },
 ];
 
 const grid = $("teamGrid");

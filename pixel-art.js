@@ -454,15 +454,38 @@ function addFreckles(row) {
     return [...row].map((cell, i) => (cell === "S" && [3, 4, 9, 10].includes(i) ? "f" : cell)).join("");
 }
 
-export function pixelPortrait({ style = "short", skin, hair, shirt, narrow = false, freckles = false }, scale = 6) {
+// óculos de grau: um aninho (cima, baixo, lado a lado) em volta de cada olho, sem
+// ponte — fica um vão de pele entre as duas lentes, como o nariz. Os olhos ficam
+// sempre nas colunas 4 e 9, nos quatro cortes de cabelo
+function addGlasses(head) {
+    const brow = [...head[4]];
+    const eyes = [...head[5]];
+    const cheek = [...head[6]];
+
+    [4, 9].forEach((col) => {
+        if (brow[col] === "S") brow[col] = "G";
+        if (cheek[col] === "S") cheek[col] = "G";
+        [col - 1, col + 1].forEach((j) => {
+            if (eyes[j] === "S") eyes[j] = "G";
+        });
+    });
+
+    head[4] = brow.join("");
+    head[5] = eyes.join("");
+    head[6] = cheek.join("");
+}
+
+export function pixelPortrait({ style = "short", skin, hair, shirt, narrow = false, freckles = false, glasses = false }, scale = 6) {
     const head = [...HEAD_ROWS[style]];
     if (narrow) head[5] = narrowEyes(head[5]);
+    if (glasses) addGlasses(head);
     if (freckles) head[6] = addFreckles(head[6]);
 
     return render(
         [...head, ...BODY_ROWS],
         {
             K: "#201a14",
+            G: "#2b2b2b",
             S: skin,
             s: darken(skin, 0.15),
             f: darken(skin, 0.28),

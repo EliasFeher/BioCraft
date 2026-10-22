@@ -382,7 +382,7 @@ section:focus {
 
 .liquid-tree {
     max-width: 1230px;
-    margin: 70px auto 0;
+    margin: 0 auto;
     display: grid;
     /* o desenho tem no máximo 380px; o resto fica para o texto */
     grid-template-columns: minmax(0, 1fr) 380px;
