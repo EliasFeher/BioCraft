@@ -2140,6 +2140,24 @@ section:focus {
     color: #fff;
 }
 
+.chat-retry {
+    margin-top: 8px;
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.chat-retry:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+}
+
 .chat-msg.typing {
     color: #55645b;
     animation: blink 1.2s infinite;
