@@ -933,7 +933,7 @@ section:focus {
 /* ---------- sobre o projeto ---------- */
 
 .about-section {
-    padding: 110px 0 100px;
+    padding: 70px 0;
     background: var(--bg-alt);
     color: #073b2b;
 }
@@ -945,7 +945,6 @@ section:focus {
 
 .about-header {
     max-width: 850px;
-    margin-bottom: 90px;
 }
 
 .about-label {
@@ -979,7 +978,6 @@ section:focus {
 /* equipe: cada integrante com um rostinho em pixel art (montado em team.js) */
 
 .team {
-    margin-bottom: 80px;
     padding: 55px 0 65px;
     border-block: 1px solid rgba(7, 59, 43, 0.18);
 }
@@ -996,7 +994,7 @@ section:focus {
 .team-grid {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 22px;
 }
 
@@ -1049,7 +1047,6 @@ section:focus {
 /* foto do protótipo */
 
 .project-photo {
-    margin-top: 80px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 60px;
@@ -2288,7 +2285,7 @@ footer {
     }
 
     .about-section {
-        padding: 100px 0;
+        padding: 60px 0;
     }
 
     .team-grid {
@@ -2405,6 +2402,270 @@ footer {
 
     .pulse-orb {
         left: 32px;
+    }
+}
+
+/* ---------- telas de computador ---------- */
+
+/* Cada seção ocupa a tela inteira abaixo do menu, com o conteúdo centralizado.
+   Os tamanhos usam a altura da janela (vh) para tudo caber, mesmo num notebook de 768px. */
+@media (min-width: 1001px) {
+    :root {
+        --screen: calc(100vh - 74px);
+    }
+
+    .section,
+    .monitor-section,
+    .about-section,
+    .quote-band,
+    .game-section,
+    .contact-section {
+        min-height: var(--screen);
+        padding-block: 36px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* os blocos de dentro precisam de largura própria, já que ficam centralizados por margem */
+    .liquid-tree,
+    .about-quote,
+    .game,
+    .game-section .section-header,
+    .contact-content {
+        width: 100%;
+    }
+
+    .liquid-tree {
+        margin-top: 0;
+    }
+
+    /* início */
+    .hero {
+        min-height: 100vh;
+    }
+
+    .hero-content {
+        padding-block: 32px;
+    }
+
+    .hero-3d {
+        min-height: 0;
+    }
+
+    .hero h1 {
+        font-size: clamp(42px, min(5vw, 9vh), 72px);
+    }
+
+    /* monitoramento: mesma ordem de sempre (título, botão e painel), só com menos respiro */
+    .monitor-header {
+        margin-bottom: 28px;
+    }
+
+    .monitor-header h2 {
+        margin-bottom: 10px;
+        font-size: clamp(30px, min(4.5vw, 6.2vh), 52px);
+    }
+
+    .biopulse {
+        padding: 16px 0 8px;
+        gap: 14px;
+    }
+
+    .monitor.is-active .monitor-reveal {
+        margin-top: 22px;
+    }
+
+    .monitor-panel {
+        min-height: 0;
+    }
+
+    .monitor-info {
+        padding: 22px 24px;
+    }
+
+    .co2-card {
+        padding-bottom: 16px;
+    }
+
+    .co2-value strong {
+        font-size: clamp(40px, 6vh, 56px);
+    }
+
+    .sensor-item {
+        padding: 12px 0;
+    }
+
+    .unit-location {
+        padding-top: 14px;
+    }
+
+    .monitor-chart {
+        padding: 22px 28px 20px;
+    }
+
+    .chart-header {
+        margin-bottom: 14px;
+    }
+
+    .chart-body {
+        height: clamp(140px, 27vh, 270px);
+    }
+
+    /* sobre, equipe e protótipo */
+    .about-header {
+        margin-inline: auto;
+        text-align: center;
+    }
+
+    .about-header p {
+        margin-inline: auto;
+    }
+
+    .team {
+        padding: 36px 0 44px;
+    }
+
+    .team-head h3 {
+        margin-bottom: 30px;
+    }
+
+    .project-photo img {
+        width: auto;
+        max-height: calc(100vh - 74px - 100px);
+    }
+
+    /* jogo */
+    .game-section .section-header {
+        margin-bottom: 18px;
+    }
+
+    .game-section .section-header h2 {
+        margin: 8px 0 0;
+        font-size: clamp(28px, min(4vw, 5.6vh), 48px);
+    }
+
+    .totem-stage {
+        height: clamp(200px, 34vh, 330px);
+    }
+
+    /* contato */
+    .contact-content {
+        gap: 80px;
+    }
+}
+
+/* notebooks de tela baixa (1366x768 e parecidos): o painel de monitoramento vira uma faixa em cima do gráfico */
+@media (min-width: 1001px) and (max-height: 800px) {
+    .monitor-section {
+        padding-block: 20px;
+    }
+
+    .monitor-header {
+        transition: margin-bottom 0.6s;
+    }
+
+    .monitor-header h2 {
+        margin-bottom: 6px;
+    }
+
+    .monitor-header p {
+        max-width: none;
+        font-size: 16px;
+    }
+
+    .biopulse {
+        gap: 6px;
+        transition: padding 0.6s;
+    }
+
+    /* com o painel aberto o espaço aperta; antes de ativar sobra tela, então fica mais folgado */
+    .monitor.is-active .monitor-header {
+        margin-bottom: 8px;
+    }
+
+    .monitor.is-active .biopulse {
+        padding: 0;
+    }
+
+    .biopulse-btn {
+        padding: 14px 48px 14px 80px;
+        font-size: 20px;
+    }
+
+    .pulse-orb {
+        left: 36px;
+    }
+
+    .biopulse-status {
+        font-size: 11px;
+    }
+
+    .monitor.is-active .monitor-reveal {
+        margin-top: 10px;
+    }
+
+    .monitor-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .monitor-info {
+        flex-direction: row;
+        align-items: center;
+        gap: 28px;
+        padding: 14px 24px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .co2-card {
+        padding: 0 28px 0 0;
+        border-bottom: none;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .data-label {
+        margin-bottom: 6px;
+    }
+
+    .co2-value strong {
+        font-size: 40px;
+    }
+
+    .co2-status {
+        margin-top: 6px;
+    }
+
+    .sensor-data {
+        flex: 1;
+        display: flex;
+        gap: 36px;
+    }
+
+    .sensor-item {
+        padding: 0;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        border-bottom: none;
+    }
+
+    .unit-location {
+        margin: 0 0 0 auto;
+        padding: 0;
+        text-align: right;
+    }
+
+    .monitor-chart {
+        padding: 16px 24px 14px;
+    }
+
+    .chart-header {
+        margin-bottom: 10px;
+    }
+
+    .chart-body {
+        height: clamp(80px, calc(100vh - 570px), 220px);
     }
 }
 
