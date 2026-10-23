@@ -409,6 +409,28 @@ const HEAD_ROWS = {
         ".SSSSSssSSSSS.",
         ".SSSSSSSSSSSS.",
     ],
+    // topete: cabelo levantado na frente, laterais curtas e a testa aparecendo
+    quiff: [
+        "......HHHHH...",
+        "...HHHHHHHHH..",
+        ".HHHHHHHHHHHH.",
+        ".HHHHHHHHHHHH.",
+        ".HSSSSSSSSSSH.",
+        ".SSSKSSSSKSSS.",
+        ".SSSSSssSSSSS.",
+        ".SSSSSSSSSSSS.",
+    ],
+    // médio: como o curto, só que com mais volume em cima e nas laterais
+    medium: [
+        "..HHHHHHHHHH..",
+        ".HHHHHHHHHHHH.",
+        "HHHHHHHHHHHHHH",
+        "HHHHHHHHHHHHHH",
+        "HHHHSSSSSSSSHH",
+        "HSSSKSSSSKSSSH",
+        ".SSSSSssSSSSS.",
+        ".SSSSSSSSSSSS.",
+    ],
     // ondulado: topo irregular, com mechas que descem pelas laterais
     wavy: [
         "..HH.HHHHH.HH.",
