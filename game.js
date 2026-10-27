@@ -189,6 +189,8 @@ function renderCard() {
     el.result.hidden = viewing || !pendingResult;
     el.end.hidden = !viewing;
     el.cardLabel.textContent = viewing ? "SEU PLANETA" : "A SITUAÇÃO";
+    // o "Como jogar" só faz sentido durante a partida; no resultado ele some
+    el.howTo.hidden = Boolean(game.over);
 
     if (viewing) {
         renderEnd();

@@ -3,6 +3,7 @@ import { THREE, createStage, trackPointer, seededRandom } from "./scene-utils.js
 import { createBlockMaterials } from "./blocks.js";
 import "./game.js";
 import "./team.js";
+import "./flow.js";
 import "./chat.js";
 import "./nav.js";
 

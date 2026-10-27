@@ -59,6 +59,61 @@ const SPRITES = {
         ],
     },
 
+    // ícones do fluxograma "como funciona" (o tanque usa o desenho "tree" acima)
+    cloud: {
+        palette: { K: "#3a3f3c", G: "#8d968f", g: "#b5bcb6" },
+        rows: [
+            "............",
+            "............",
+            "....KKKK....",
+            "...KggggK...",
+            ".KKgGGGGgK..",
+            "KggGGGGGGgK.",
+            "KgGGGGGGGGgK",
+            "KGGGGGGGGGGK",
+            ".KGGGGGGGGK.",
+            "..KKKKKKKK..",
+            "............",
+            "............",
+        ],
+    },
+
+    sun: {
+        palette: { Y: "#ffd84a", O: "#f0a830", W: "#fff3b0" },
+        rows: [
+            ".....YY.....",
+            ".Y...YY...Y.",
+            "..Y......Y..",
+            "....OOOO....",
+            "...OYYYYO...",
+            "YY.OYWYYO.YY",
+            "YY.OYYYYO.YY",
+            "...OYYYYO...",
+            "....OOOO....",
+            "..Y......Y..",
+            ".Y...YY...Y.",
+            ".....YY.....",
+        ],
+    },
+
+    bubbles: {
+        palette: { K: "#1f6f8b", W: "#ffffff", L: "#9fe6ff" },
+        rows: [
+            "......KK....",
+            ".....KWWK...",
+            ".....KWLK...",
+            "......KK....",
+            "..KKK.......",
+            ".KWWLK......",
+            ".KWLLK..KK..",
+            ".KLLLK.KWLK.",
+            "..KKK..KLLK.",
+            "........KK..",
+            "..KWLK......",
+            "...KK.......",
+        ],
+    },
+
     sapling: {
         palette: { G: "#4fae3c", g: "#2f7a2a", T: "#7a5230", t: "#5a3a20" },
         rows: [

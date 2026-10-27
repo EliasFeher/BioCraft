@@ -21,7 +21,7 @@ export const CARDS = [
         id: "defeito",
         title: "Defeito na praça",
         who: { name: "Marina", role: "Técnica de campo", look: "tecnica" },
-        text: "Uma Árvore-Líquida da praça central parou de circular a água e as algas estão ficando amarelas. O reparo custa R$ 8 mil. Se esperar, ela talvez se recupere sozinha… ou não.",
+        text: "A Árvore-Líquida da praça quebrou e as algas estão morrendo. O conserto custa R$ 8 mil.",
         options: [
             {
                 label: "Consertar agora",
@@ -41,7 +41,7 @@ export const CARDS = [
         id: "prazo",
         title: "Prazo da inauguração",
         who: { name: "Rogério", role: "Prefeito", look: "prefeito" },
-        text: "A prefeitura quer 10 Árvores-Líquidas na avenida nova, prontas em 30 dias. Só dá para cumprir o prazo se o teste de qualidade da água for pulado.",
+        text: "A prefeitura quer 10 Árvores-Líquidas prontas em 30 dias. Para dar tempo, seria preciso pular o teste da água.",
         options: [
             {
                 label: "Pular o teste",
@@ -50,7 +50,7 @@ export const CARDS = [
                 result: "Tudo ficou pronto no prazo e o contrato rendeu bem. Mas dois tanques entraram com a água fora do padrão e as algas sofreram.",
             },
             {
-                label: "Pedir mais prazo",
+                label: "Recusar oferta",
                 economy: -6,
                 sustainability: 9,
                 result: "O prefeito reclamou do atraso, mas as dez árvores entraram em funcionamento testadas e seguras.",
@@ -61,7 +61,7 @@ export const CARDS = [
         id: "investidora",
         title: "Dinheiro com condição",
         who: { name: "Helena", role: "Investidora", look: "investidora" },
-        text: "Uma investidora quer financiar uma fábrica de tanques e dobrar a produção. A condição é usar plástico barato, sem reciclagem, para baixar o custo.",
+        text: "Uma investidora quer dobrar a produção, mas só se os tanques forem feitos de plástico barato, sem reciclagem.",
         options: [
             {
                 label: "Recusar a condição",
@@ -81,7 +81,7 @@ export const CARDS = [
         id: "escola",
         title: "Visita da escola",
         who: { name: "Ana", role: "Professora", look: "professora" },
-        text: "A escola do bairro quer levar 120 alunos para conhecer a Árvore-Líquida. Receber a turma pede um dia sem manutenção e uma equipe de apoio.",
+        text: "Uma escola quer trazer 120 alunos para conhecer a Árvore-Líquida. Isso custa um dia de trabalho da equipe.",
         options: [
             {
                 label: "Adiar a visita",
@@ -101,7 +101,7 @@ export const CARDS = [
         id: "agua",
         title: "A água do tanque",
         who: { name: "Seu Carlos", role: "Operador", look: "operador" },
-        text: "É dia de trocar a água dos tanques, cheia de nutrientes. Tratar antes de descartar custa R$ 5 mil. Despejar no córrego é de graça e ninguém fiscaliza.",
+        text: "É hora de trocar a água dos tanques. Tratar antes custa R$ 5 mil. Jogar no córrego é de graça.",
         options: [
             {
                 label: "Tratar a água",
@@ -121,7 +121,7 @@ export const CARDS = [
         id: "alga",
         title: "Uma alga melhor",
         who: { name: "Dr. Pedro", role: "Pesquisador", look: "cientista" },
-        text: "Um pesquisador da universidade achou uma alga que captura 30% mais CO₂. Para usá-la, é preciso trocar a água e adaptar todos os tanques.",
+        text: "Um pesquisador achou uma alga que captura 30% mais CO₂. Mas trocar todos os tanques custa caro.",
         options: [
             {
                 label: "Manter como está",
@@ -141,7 +141,7 @@ export const CARDS = [
         id: "contrato",
         title: "O contrato gigante",
         who: { name: "Augusto", role: "Diretor da metalúrgica", look: "diretor" },
-        text: "A maior fábrica da cidade quer pagar a BioCraft para “compensar” as emissões dela no papel, sem reduzir nada. O contrato é enorme.",
+        text: "A maior fábrica da cidade quer pagar a BioCraft para parecer verde, sem poluir menos. O contrato é enorme.",
         options: [
             {
                 label: "Exigir que ela reduza",

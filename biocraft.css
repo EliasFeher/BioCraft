@@ -450,6 +450,183 @@ section:focus {
 }
 
 
+/* ---------- como funciona (fluxograma) ---------- */
+
+.flow-header {
+    margin-bottom: 56px;
+}
+
+.flow {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    list-style: none;
+}
+
+.flow-step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* quadro do ícone, no mesmo estilo dos botões e painéis do site */
+.flow-icon {
+    position: relative;
+    z-index: 1;
+    width: 96px;
+    height: 96px;
+    margin-bottom: 22px;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    border: 2px solid var(--brand);
+    box-shadow: 0 6px 0 var(--brand);
+}
+
+.flow-icon svg {
+    width: 56px;
+    height: auto;
+    animation: flow-bob 2.4s steps(2) infinite;
+    animation-delay: calc(var(--i, 0) * 0.3s);
+}
+
+@keyframes flow-bob {
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.flow-num {
+    position: absolute;
+    top: -14px;
+    left: -14px;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--brand);
+    background: var(--green-light);
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--brand-deep);
+}
+
+.flow-step h3 {
+    margin-bottom: 8px;
+    font-size: 20px;
+    color: var(--green-dark);
+}
+
+.flow-step p {
+    max-width: 230px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--gray);
+}
+
+/* trilha de pixels ligando um passo ao próximo, andando no sentido do fluxo */
+.flow-step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 45px;
+    left: calc(50% + 62px);
+    width: calc(100% + 24px - 124px);
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--green) 0 6px, transparent 6px 14px);
+    animation: flow-march 1.4s steps(7) infinite;
+}
+
+@keyframes flow-march {
+    to {
+        background-position: 14px 0;
+    }
+}
+
+/* entrada: os passos aparecem um de cada vez quando a seção chega na tela (classes de flow.js) */
+.flow.js-ready .flow-step {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.5s, transform 0.5s steps(4);
+    transition-delay: calc(var(--i, 0) * 0.18s);
+}
+
+.flow.js-ready .flow-step::after {
+    opacity: 0;
+    transition: opacity 0.4s;
+    transition-delay: calc(var(--i, 0) * 0.18s + 0.3s);
+}
+
+.flow.js-ready.is-visible .flow-step {
+    opacity: 1;
+    transform: none;
+}
+
+.flow.js-ready.is-visible .flow-step::after {
+    opacity: 1;
+}
+
+/* telas menores: os passos viram uma lista, com a trilha descendo de um ícone para o outro */
+@media (max-width: 1000px) {
+    .flow-header {
+        margin-bottom: 40px;
+    }
+
+    .flow {
+        max-width: 520px;
+        grid-template-columns: 1fr;
+        gap: 36px;
+    }
+
+    /* ícone numa coluna; título e texto empilhados na outra */
+    .flow-step {
+        display: grid;
+        grid-template-columns: 84px 1fr;
+        align-content: start;
+        column-gap: 22px;
+        text-align: left;
+    }
+
+    .flow-icon {
+        grid-row: span 2;
+        width: 84px;
+        height: 84px;
+        margin-bottom: 0;
+    }
+
+    .flow-icon svg {
+        width: 48px;
+    }
+
+    .flow-step h3 {
+        margin: 12px 0 6px;
+    }
+
+    .flow-step p {
+        max-width: none;
+    }
+
+    .flow-step:not(:last-child)::after {
+        top: 98px;
+        left: 39px;
+        width: 6px;
+        height: calc(100% - 84px + 36px - 28px);
+        background: repeating-linear-gradient(180deg, var(--green) 0 6px, transparent 6px 14px);
+        animation-name: flow-march-down;
+    }
+}
+
+@keyframes flow-march-down {
+    to {
+        background-position: 0 14px;
+    }
+}
+
+
 /* ---------- monitoramento ---------- */
 
 .monitor-section {
@@ -1566,6 +1743,9 @@ section:focus {
 .how-to {
     margin-top: auto;
     align-self: center;
+    /* desce o botão um pouco sem mexer no espaço do resto do jogo */
+    position: relative;
+    top: 10px;
     padding: 6px 12px;
     border: none;
     background: none;
@@ -2753,8 +2933,17 @@ footer {
 
 @media (prefers-reduced-motion: reduce) {
     .pulse-orb i,
-    .bubble {
+    .bubble,
+    .flow-icon svg,
+    .flow-step::after {
         animation: none;
+    }
+
+    .flow.js-ready .flow-step,
+    .flow.js-ready .flow-step::after {
+        opacity: 1;
+        transform: none;
+        transition: none;
     }
 
     .monitor-reveal,
