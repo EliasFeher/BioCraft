@@ -452,6 +452,22 @@ section:focus {
 
 /* ---------- como funciona (fluxograma) ---------- */
 
+/* linha de pixels separando o fluxograma da seção de cima (as duas têm o mesmo fundo) */
+.flow-section {
+    position: relative;
+}
+
+.flow-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(1100px, calc(100% - 50px));
+    height: 4px;
+    transform: translateX(-50%);
+    background: repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 16px);
+}
+
 .flow-header {
     margin-bottom: 56px;
 }
@@ -2218,8 +2234,8 @@ section:focus {
 }
 
 .chat-toggle {
-    width: 48px;
-    height: 48px;
+    width: 60px;
+    height: 60px;
     display: grid;
     place-items: center;
     border: none;
@@ -2243,13 +2259,13 @@ section:focus {
 }
 
 .chat-icon {
-    width: 36px;
+    width: 48px;
     height: auto;
     filter: drop-shadow(0 3px 0 rgba(3, 32, 18, 0.35));
 }
 
 .chat-icon-close {
-    width: 26px;
+    width: 34px;
     display: none;
 }
 
